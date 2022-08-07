@@ -113,13 +113,35 @@ class Tree {
         fn(this.#root);
         if (!callback) return list;
     }
+    height = (node = this.#root) => {
+        const sumEdges = (node) => {
+            let edgeCount = [];
+            
+            if (node.leftNode == null || node.rightNode)
+            {
+                edgeCount = [0, 0];
+            }
+            if (node.leftNode !== null) {
+                edgeCount[0] = (sumEdges(node.leftNode, edgeCount))[0];
+                edgeCount[0] += 1;
+            }
+            if (node.rightNode !== null) {
+                edgeCount[1] = (sumEdges(node.rightNode, edgeCount))[1];
+                edgeCount[1] += 1;
+            }
+            return edgeCount;
+        }
+        let result = sumEdges(node);
+        result.sort((a, b) => a - b);
+        return result[1];
+    }
     delete = (val) => {
 
     }
 }
 
-let tree = new Tree([1,2,3,4,5,6,7]);
+let tree = new Tree([1,2,3,4,5,6,7,8]);
 console.log(tree.inOrder())
 console.log(tree.preOrder())
 console.log(tree.postOrder())
-// console.log(tree.find())
+console.log(tree.height())
