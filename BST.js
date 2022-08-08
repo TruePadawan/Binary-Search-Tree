@@ -34,16 +34,22 @@ class Tree {
     };
     return construct(cleanedArray, 0, cleanedArray.length - 1);
   };
-  insert = (val, node = this.#root) => {
-    if (val == undefined) throw new Error("No arguments passed");
-    if (node == null) return new TNode(val);
 
-    if (val > node.value) {
-      node.rightNode = this.insert(val, node.rightNode);
-    } else if (val < node.value) {
-      node.leftNode = this.insert(val, node.leftNode);
+  insert = (val, node = this.#root) => {
+    const insertRec = (value, node) => {
+        if (value == undefined) throw new Error("No arguments passed");
+        if (node == null) return new TNode(value);
+    
+        if (value > node.value) {
+          node.rightNode = insertRec(value, node.rightNode);
+        } else if (value < node.value) {
+          node.leftNode = insertRec(value, node.leftNode);
+        }
+        return node;
     }
+    this.#root = insertRec(val, node);
   };
+
   find = (val) => {
     if (val == undefined || !Number.isInteger(val))
       throw new Error("Invalid argument passed");
@@ -56,6 +62,7 @@ class Tree {
     };
     return search(val, this.#root);
   };
+
   levelOrder = (callback) => {
     const queue = [this.#root];
     const list = [];
@@ -69,6 +76,7 @@ class Tree {
     }
     if (!callback) return list;
   };
+
   inOrder = (callback) => {
     const list = [];
     const fn = (node) => {
@@ -83,6 +91,7 @@ class Tree {
     fn(this.#root);
     if (!callback) return list;
   };
+
   preOrder = (callback) => {
     const list = [];
     const fn = (node) => {
@@ -96,6 +105,7 @@ class Tree {
     fn(this.#root);
     if (!callback) return list;
   };
+
   postOrder = (callback) => {
     const list = [];
     const fn = (node) => {
@@ -109,6 +119,7 @@ class Tree {
     fn(this.#root);
     if (!callback) return list;
   };
+
   height = (node = this.#root) => {
     const sumEdges = (node) => {
       let edgeCount = [];
@@ -130,6 +141,7 @@ class Tree {
     result.sort((a, b) => a - b);
     return result[1];
   };
+
   depth = (node) => {
     if (node == undefined) throw new Error("No arguments passed");
     const countEdges = (tnode) => {
@@ -148,6 +160,24 @@ class Tree {
     };
     return countEdges(this.#root);
   };
+  isBalanced = () => {
+    let balanced = true;
+    const check = (node) => {
+        let leftSubtree = node.leftNode;
+        let rightSubtree = node.rightNode;
+
+        if (leftSubtree !== null && rightSubtree !== null)
+        {
+            const leftSubtreeHeight = this.height(leftSubtree);
+            const rightSubtreeHeight = this.height(rightSubtree);
+            if (Math.abs(leftSubtreeHeight - rightSubtreeHeight) > 1) balanced = false;
+        }
+        if (leftSubtree) check(leftSubtree)
+        if (rightSubtree) check(rightSubtree)
+    }
+    check(this.#root);
+    return balanced;
+  }
   rebalance = () => {
     const sortedList = this.inOrder();
     this.#root = this.#buildTree(sortedList);
@@ -155,10 +185,12 @@ class Tree {
   delete = (val) => {};
 }
 
-let tree = new Tree([1,2,3,4,5,6,7,8]);
-let node = tree.find(8);
-console.log(node)
+let tree = new Tree([1,2,3,4,5,6,7]);
+tree.insert(8);
+tree.insert(9);
 console.log(tree.inOrder())
 console.log(tree.preOrder())
 console.log(tree.postOrder())
-console.log(tree.depth(node))
+console.log(tree.isBalanced())
+tree.rebalance()
+console.log(tree.isBalanced())
