@@ -47,7 +47,14 @@ class Tree {
         }
         return node;
     }
-    this.#root = insertRec(val, node);
+    if (val instanceof Array)
+    {
+      val.forEach(item => {
+        this.#root = insertRec(item, node);
+      });
+    } else {
+      this.#root = insertRec(val, node);
+    }
   };
 
   find = (val) => {
@@ -237,10 +244,23 @@ class Tree {
   };
 }
 
-let tree = new Tree([1,2,3,4,5,6,7]);
-tree.insert(8);
-tree.insert(9);
+const generateArr = (length = 10) => {  
+  return Array.from({ length }, () => Math.floor(Math.random() * length));
+}
+
+const arr = generateArr(10);
+let tree = new Tree(arr);
+
+console.log(tree.isBalanced())
 console.log(tree.inOrder())
 console.log(tree.preOrder())
 console.log(tree.postOrder())
+
+tree.insert(generateArr(100));
 console.log(tree.isBalanced())
+tree.rebalance()
+
+console.log(tree.isBalanced())
+console.log(tree.inOrder())
+console.log(tree.preOrder())
+console.log(tree.postOrder())
