@@ -1,24 +1,3 @@
-const sortAndRemoveDuplicates = array => {
-    array.sort((a, b) => a - b);
-    array = [...new Set(array)];
-    return array;
-}
-
-const buildTree = (array) => {
-    let cleanedArray = sortAndRemoveDuplicates(array);
-    const construct = (arr, start, end) => {
-        if (start > end) return null;
-        const middle = parseInt((start+end)/2);
-        const rootNode = new TNode(arr[middle]);
-
-        rootNode.leftNode = construct(arr, start, middle-1);
-        rootNode.rightNode = construct(arr, middle+1, end);
-
-        return rootNode;
-    }
-    return construct(cleanedArray, 0, cleanedArray.length-1);
-}
-
 class TNode {
     value;
     leftNode;
@@ -31,134 +10,149 @@ class TNode {
 }
 
 class Tree {
-    #root = null;
-    constructor(array) {
-        this.#root = buildTree(array);
-    }
-    insert = (val, node = this.#root) => {
-        if (val == undefined) throw new Error("No arguments passed");
-        if (node == null) return new TNode(val);
+  #root = null;
+  constructor(array) {
+    this.#root = this.#buildTree(array);
+  }
+  #sortAndRemoveDuplicates = (array) => {
+    array.sort((a, b) => a - b);
+    array = [...new Set(array)];
+    return array;
+  };
 
-        if (val > node.value)
-        {
-            node.rightNode = this.insert(val, node.rightNode);
-        }
-        else if (val < node.value)
-        {
-            node.leftNode = this.insert(val, node.leftNode);
-        }
-    }
-    find = (val) => {
-        if (val == undefined || !Number.isInteger(val)) throw new Error("Invalid argument passed");
-        const search = (val, node) => {
-            if (node === null) return null;
-            if (node.value == val) return node;
+  #buildTree = (array) => {
+    let cleanedArray = this.#sortAndRemoveDuplicates(array);
+    const construct = (arr, start, end) => {
+      if (start > end) return null;
+      const middle = parseInt((start + end) / 2);
+      const rootNode = new TNode(arr[middle]);
 
-            if (node.value < val) return search(val, node.rightNode)
-            else if (node.value > val) return search(val, node.leftNode)
-        }
-        return search(val, this.#root);
-    }
-    levelOrder = (callback) => {
-        const queue = [this.#root];
-        const list = [];
-        while(queue.length > 0)
-        {
-            const node = queue.shift();
-            if (node.leftNode !== null) queue.push(node.leftNode)
-            if (node.rightNode !== null) queue.push(node.rightNode)
-            
-            if (callback) callback(node)
-            else list.push(node.value);
-        }
-        if (!callback) return list;
-    }
-    inOrder = (callback) => {
-        const list = [];
-        const fn = (node) => {
-            if (node == null) return;
-            fn(node.leftNode);
+      rootNode.leftNode = construct(arr, start, middle - 1);
+      rootNode.rightNode = construct(arr, middle + 1, end);
 
-            if (callback) callback(node)
-            else list.push(node.value);
+      return rootNode;
+    };
+    return construct(cleanedArray, 0, cleanedArray.length - 1);
+  };
+  insert = (val, node = this.#root) => {
+    if (val == undefined) throw new Error("No arguments passed");
+    if (node == null) return new TNode(val);
 
-            fn(node.rightNode);
-        }
-        fn(this.#root);
-        if (!callback) return list;
+    if (val > node.value) {
+      node.rightNode = this.insert(val, node.rightNode);
+    } else if (val < node.value) {
+      node.leftNode = this.insert(val, node.leftNode);
     }
-    preOrder = (callback) => {
-        const list = [];
-        const fn = (node) => {
-            if (node == null) return;
-            
-            if (callback) callback(node)
-            else list.push(node.value);
-            fn(node.leftNode);
-            fn(node.rightNode);
-        }
-        fn(this.#root);
-        if (!callback) return list;
-    }
-    postOrder = (callback) => {
-        const list = [];
-        const fn = (node) => {
-            if (node == null) return;
-            fn(node.leftNode);
-            fn(node.rightNode);
+  };
+  find = (val) => {
+    if (val == undefined || !Number.isInteger(val))
+      throw new Error("Invalid argument passed");
+    const search = (val, node) => {
+      if (node === null) return null;
+      if (node.value == val) return node;
 
-            if (callback) callback(node)
-            else list.push(node.value);
-        }
-        fn(this.#root);
-        if (!callback) return list;
-    }
-    height = (node = this.#root) => {
-        const sumEdges = (node) => {
-            let edgeCount = [];
-            
-            if (node.leftNode == null || node.rightNode == null)
-            {
-                edgeCount = [0, 0];
-            }
-            if (node.leftNode !== null) {
-                edgeCount[0] = (sumEdges(node.leftNode))[0];
-                edgeCount[0] += 1;
-            }
-            if (node.rightNode !== null) {
-                edgeCount[1] = (sumEdges(node.rightNode))[1];
-                edgeCount[1] += 1;
-            }
-            return edgeCount;
-        }
-        let result = sumEdges(node);
-        result.sort((a, b) => a - b);
-        return result[1];
-    }
-    depth = (node) => {
-        if (node == undefined) throw new Error("No arguments passed");
-        const countEdges = (tnode) => {
-            if (node === null) return null;
-            if (node.value == tnode.value) return 0;
+      if (node.value < val) return search(val, node.rightNode);
+      else if (node.value > val) return search(val, node.leftNode);
+    };
+    return search(val, this.#root);
+  };
+  levelOrder = (callback) => {
+    const queue = [this.#root];
+    const list = [];
+    while (queue.length > 0) {
+      const node = queue.shift();
+      if (node.leftNode !== null) queue.push(node.leftNode);
+      if (node.rightNode !== null) queue.push(node.rightNode);
 
-            if (node.value > tnode.value)
-            {
-                let count = countEdges(tnode.rightNode);
-                if (count !== null) return 1 + count
-                else return null;
-            }
-            else if (node.value < tnode.value)
-            {
-                let count = countEdges(tnode.leftNode);
-                if (count !== null) return 1 + count
-                else return null;
-            }
-        }
-        return countEdges(this.#root);
+      if (callback) callback(node);
+      else list.push(node.value);
     }
-    delete = (val) => {
+    if (!callback) return list;
+  };
+  inOrder = (callback) => {
+    const list = [];
+    const fn = (node) => {
+      if (node == null) return;
+      fn(node.leftNode);
 
-    }
+      if (callback) callback(node);
+      else list.push(node.value);
+
+      fn(node.rightNode);
+    };
+    fn(this.#root);
+    if (!callback) return list;
+  };
+  preOrder = (callback) => {
+    const list = [];
+    const fn = (node) => {
+      if (node == null) return;
+
+      if (callback) callback(node);
+      else list.push(node.value);
+      fn(node.leftNode);
+      fn(node.rightNode);
+    };
+    fn(this.#root);
+    if (!callback) return list;
+  };
+  postOrder = (callback) => {
+    const list = [];
+    const fn = (node) => {
+      if (node == null) return;
+      fn(node.leftNode);
+      fn(node.rightNode);
+
+      if (callback) callback(node);
+      else list.push(node.value);
+    };
+    fn(this.#root);
+    if (!callback) return list;
+  };
+  height = (node = this.#root) => {
+    const sumEdges = (node) => {
+      let edgeCount = [];
+
+      if (node.leftNode == null || node.rightNode == null) {
+        edgeCount = [0, 0];
+      }
+      if (node.leftNode !== null) {
+        edgeCount[0] = sumEdges(node.leftNode)[0];
+        edgeCount[0] += 1;
+      }
+      if (node.rightNode !== null) {
+        edgeCount[1] = sumEdges(node.rightNode)[1];
+        edgeCount[1] += 1;
+      }
+      return edgeCount;
+    };
+    let result = sumEdges(node);
+    result.sort((a, b) => a - b);
+    return result[1];
+  };
+  depth = (node) => {
+    if (node == undefined) throw new Error("No arguments passed");
+    const countEdges = (tnode) => {
+      if (node === null) return null;
+      if (node.value == tnode.value) return 0;
+
+      if (node.value > tnode.value) {
+        let count = countEdges(tnode.rightNode);
+        if (count !== null) return 1 + count;
+        else return null;
+      } else if (node.value < tnode.value) {
+        let count = countEdges(tnode.leftNode);
+        if (count !== null) return 1 + count;
+        else return null;
+      }
+    };
+    return countEdges(this.#root);
+  };
+  rebalance = () => {
+    const sortedList = this.inOrder();
+    this.#root = this.#buildTree(sortedList);
+  };
+  delete = (val) => {};
 }
 
 let tree = new Tree([1,2,3,4,5,6,7,8]);
