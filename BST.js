@@ -182,7 +182,59 @@ class Tree {
     const sortedList = this.inOrder();
     this.#root = this.#buildTree(sortedList);
   };
-  delete = (val) => {};
+  delete = (val, root = this.#root) => {
+    if (val == undefined) throw new Error("No arguments passed");
+    const del = (node) => {
+      if (node == null) return null;
+
+      if (val < node.value) {
+        node.leftNode = del(node.leftNode);
+      }
+      else if (val > node.value) {
+        node.rightNode = del(node.rightNode);
+      }
+
+      if (node.value == val)
+      {
+        let leftNode = node.leftNode;
+        let rightNode = node.rightNode;
+
+        // NODE HAS NO CHILDREN
+        if (leftNode == null && rightNode == null) {
+          return null;
+        }
+        // NODE HAS ONE CHILD
+        if (leftNode != null && rightNode == null) {
+          return leftNode;
+        }
+        else if (leftNode == null && rightNode != null) {
+          return rightNode;
+        }
+
+        // NODE HAS TWO CHILDREN
+        if (leftNode != null && rightNode != null) {
+          let successor = node.rightNode;
+          let successorParent = node;
+          // GET THE NEXT VALUE LARGER THAN THE NODE TO BE DELETED
+          while (successor.leftNode != null) {
+            successorParent = successor;
+            successor = successor.leftNode;
+          }
+
+          if (successorParent != node)
+          {
+            successorParent.leftNode = successor.rightNode;
+          } else {
+            successorParent.rightNode = successor.rightNode;
+          }
+          node.value = successor.value;
+          // return node;
+        }
+      }
+      return node;
+    };
+    this.#root = del(root);
+  };
 }
 
 let tree = new Tree([1,2,3,4,5,6,7]);
@@ -191,6 +243,4 @@ tree.insert(9);
 console.log(tree.inOrder())
 console.log(tree.preOrder())
 console.log(tree.postOrder())
-console.log(tree.isBalanced())
-tree.rebalance()
 console.log(tree.isBalanced())
