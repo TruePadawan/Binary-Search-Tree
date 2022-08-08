@@ -117,16 +117,16 @@ class Tree {
         const sumEdges = (node) => {
             let edgeCount = [];
             
-            if (node.leftNode == null || node.rightNode)
+            if (node.leftNode == null || node.rightNode == null)
             {
                 edgeCount = [0, 0];
             }
             if (node.leftNode !== null) {
-                edgeCount[0] = (sumEdges(node.leftNode, edgeCount))[0];
+                edgeCount[0] = (sumEdges(node.leftNode))[0];
                 edgeCount[0] += 1;
             }
             if (node.rightNode !== null) {
-                edgeCount[1] = (sumEdges(node.rightNode, edgeCount))[1];
+                edgeCount[1] = (sumEdges(node.rightNode))[1];
                 edgeCount[1] += 1;
             }
             return edgeCount;
@@ -135,13 +135,36 @@ class Tree {
         result.sort((a, b) => a - b);
         return result[1];
     }
+    depth = (node) => {
+        if (node == undefined) throw new Error("No arguments passed");
+        const countEdges = (tnode) => {
+            if (node === null) return null;
+            if (node.value == tnode.value) return 0;
+
+            if (node.value > tnode.value)
+            {
+                let count = countEdges(tnode.rightNode);
+                if (count !== null) return 1 + count
+                else return null;
+            }
+            else if (node.value < tnode.value)
+            {
+                let count = countEdges(tnode.leftNode);
+                if (count !== null) return 1 + count
+                else return null;
+            }
+        }
+        return countEdges(this.#root);
+    }
     delete = (val) => {
 
     }
 }
 
 let tree = new Tree([1,2,3,4,5,6,7,8]);
+let node = tree.find(8);
+console.log(node)
 console.log(tree.inOrder())
 console.log(tree.preOrder())
 console.log(tree.postOrder())
-console.log(tree.height())
+console.log(tree.depth(node))
